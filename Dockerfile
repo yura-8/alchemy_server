@@ -1,20 +1,44 @@
-#Docker Hubからruby:3.0.5のイメージをプルする
+FROM node:18 as node 
+
 FROM ruby:3.0.5
 
-#debian系のためapt-getを使用してnode.jsとyarnをインストール
-RUN apt-get update -qq
-RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
-&& apt-get install -y nodejs
-RUN npm install --global yarn
+COPY --from=node /opt/yarn-* /opt/yarn
+COPY --from=node /usr/local/bin/node /usr/local/bin/
+COPY --from=node /usr/local/lib/node_modules/ /usr/local/lib/node_modules/
+RUN ln -fs /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+  && ln -fs /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npx \
+  && ln -fs /opt/yarn/bin/yarn /usr/local/bin/yarn \
+  && ln -fs /opt/yarn/bin/yarnpkg /usr/local/bin/yarnpkg
 
-#docker内の作業ディレクトリを作成＆設定
-WORKDIR /alchemy_server
+RUN apt-get update -qq && \
+  apt-get install -y build-essential \
+  libpq-dev \
+  postgresql-client \
+  vim \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
 
-#Gemfile,Gemfile.lockをローカルからCOPY
-COPY Gemfile Gemfile.lock /alchemy_server/
+RUN mkdir  /alchemy_server
+WORKDIR  /alchemy_server
 
-#コンテナ内にコピーしたGemfileを用いてbundel install
+# GemfileとGemfile.lockを先にコピーしてキャッシュを活用
+COPY Gemfile Gemfile.lock ./
 RUN bundle install
 
-#railsを起動する
+# package.jsonとyarn.lockも同様に先にコピーしてキャッシュを活用
+COPY package.json yarn.lock ./
+RUN yarn install
+
+# アプリケーションコードを最後にコピー
+COPY .  /alchemy_server
+
+# 起動スクリプトを設定
+COPY entrypoint.sh /usr/bin/
+RUN chmod +x /usr/bin/entrypoint.sh
+ENTRYPOINT ["entrypoint.sh"]
+
+# Railsが使うポートを公開
+EXPOSE 3000
+
+# アプリケーションを起動
 CMD ["rails", "server", "-b", "0.0.0.0"]
