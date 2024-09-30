@@ -22,6 +22,7 @@ gem 'redis', '~> 4.0'
 
 gem 'rswag-api'
 gem 'rswag-ui'
+gem 'pg'
 
 # Use Active Model has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
