@@ -1,6 +1,13 @@
 class QuizsController < ApplicationController
     def show
-        quiz_word = Quiz.select(:quiz_word, quiz_meaning).find_by(quiz_word :params[:quiz_word])
-        render json: quiz_word
+        random_quizs = Quiz.order("RANDOM()").limit(:params[:quiz_num])
+        render json: {
+            quiz: random_quizs.map do |quiz|
+            {
+                word: quiz.word,
+                meaning: quiz.meaning
+            }
+            end
+        } 
     end
 end
