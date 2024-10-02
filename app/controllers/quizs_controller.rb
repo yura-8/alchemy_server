@@ -4,10 +4,10 @@ class QuizsController < ApplicationController
         render json: {
             quiz: random_quizs.map do |quiz|
             {
-                word: quiz.word,
-                meaning: quiz.meaning
+                word: quiz.quiz_word,
+                meaning: quiz.quiz_meaning
             }
             end
-        } 
+        }
     end
 end
