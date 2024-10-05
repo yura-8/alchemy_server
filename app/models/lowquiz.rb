@@ -1,0 +1,2 @@
+class Lowquiz < ApplicationRecord
+end

@@ -1,0 +1,2 @@
+class Middlequiz < ApplicationRecord
+end
