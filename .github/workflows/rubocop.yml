@@ -45,10 +45,6 @@ jobs:
         gem install bundler
         bundle install
 
-    - name: Set up DB configuration
-      run: |
-        cp config/database.yml.ci config/database.yml
-
     - name: Prepare Database
       env:
         RAILS_ENV: test
