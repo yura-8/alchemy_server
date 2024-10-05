@@ -1,6 +1,6 @@
 FROM node:18 as node 
 
-FROM ruby:3.0.5
+FROM ruby:3.1
 
 COPY --from=node /opt/yarn-* /opt/yarn
 COPY --from=node /usr/local/bin/node /usr/local/bin/
