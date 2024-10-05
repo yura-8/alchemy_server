@@ -3,14 +3,14 @@ Rails.application.routes.draw do
 
   mount Rswag::Ui::Engine => 'api-docs'
   mount Rswag::Api::Engine => 'api-docs'
-    
+
   namespace :v1 do
     resources :todos, only: [:index]
   end
   resources :quizs, only: [:show]
   resources :lowquizs, only: [:show]
   resources :middlequizs, only: [:show]
-  resources :rankings, only: [:index, :create] do
+  resources :rankings, only: %i[index create] do
     collection do
       post ':user_name/:score', action: :create
     end
