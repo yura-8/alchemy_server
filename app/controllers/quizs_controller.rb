@@ -1,6 +1,6 @@
 class QuizsController < ApplicationController
     def show
-        random_quizs = Quiz.order("RANDOM()").limit(:params[:quiz_num])
+        random_quizs = Quiz.order("RANDOM()").limit(params[:id].to_i)
         render json: {
             quiz: random_quizs.map do |quiz|
             {
