@@ -7,21 +7,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    services:
-      db:
-        image: postgres:14
-        env:
-          POSTGRES_DB: alchemy_test
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: password
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -44,25 +29,6 @@ jobs:
         sudo apt-get update -qq
         gem install bundler
         bundle install
-
-    - name: Wait for DB to be ready
-      run: |
-        until pg_isready -h db -U postgres; do
-          echo "Waiting for database..."
-          sleep 2
-        done
-
-    - name: Set up DB configuration
-      run: |
-        cp config/database.yml.ci config/database.yml
-
-    - name: Prepare Database
-      env:
-        RAILS_ENV: test
-      run: |
-        bundle exec rails db:create
-        bundle exec rails db:migrate
-        bundle exec rails db:seed
 
     - name: Run RSpec
       env:
