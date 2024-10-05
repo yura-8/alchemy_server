@@ -8,7 +8,9 @@ Rails.application.routes.draw do
     resources :todos, only: [:index]
   end
   resources :quizs, only: [:show]
-  resources :rankings, only: [:show, :create] do
+  resources :lowquizs, only: [:show]
+  resources :middlequizs, only: [:show]
+  resources :rankings, only: [:index, :create] do
     collection do
       post ':user_name/:score', action: :create
     end
