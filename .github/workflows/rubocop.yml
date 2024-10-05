@@ -7,6 +7,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    services:
+      db:
+        image: postgres:14
+        env:
+          POSTGRES_DB: alchemy_test  # データベース名を指定
+          POSTGRES_USER: postgres  # ユーザー名を指定
+          POSTGRES_PASSWORD: password  # パスワードを指定
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -16,19 +31,37 @@ jobs:
       with:
         ruby-version: '3.1.6'
 
-    - name: Cache Ruby gems # Ruby gemsをキャッシュします。
+    - name: Cache Ruby gems
       uses: actions/cache@v3
       with:
-        path: vendor/bundle # キャッシュするディレクトリを指定します。
-        key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }} # キャッシュのキーを指定します。
+        path: vendor/bundle
+        key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
         restore-keys: |
-          ${{ runner.os }}-gems-  # 部分一致する最新のキャッシュを探します。
+          ${{ runner.os }}-gems-
 
     - name: Install dependencies
       run: |
         sudo apt-get update -qq
         gem install bundler
         bundle install
+
+    - name: Set up DB configuration
+      run: |
+        cp config/database.yml.ci config/database.yml
+
+    - name: Prepare Database
+      env:
+        RAILS_ENV: test
+      run: |
+        bundle exec rails db:create
+        bundle exec rails db:migrate
+        bundle exec rails db:seed
+
+    - name: Run RSpec
+      env:
+        RAILS_ENV: test
+      run: bundle exec rspec
+
     - name: Run RuboCop
       run: bundle exec rubocop
 
