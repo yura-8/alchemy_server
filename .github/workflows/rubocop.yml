@@ -11,9 +11,9 @@ jobs:
       db:
         image: postgres:14
         env:
-          POSTGRES_DB: alchemy_test  # データベース名を指定
-          POSTGRES_USER: postgres  # ユーザー名を指定
-          POSTGRES_PASSWORD: password  # パスワードを指定
+          POSTGRES_DB: alchemy_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
         ports:
           - 5432:5432
         options: >-
@@ -44,6 +44,17 @@ jobs:
         sudo apt-get update -qq
         gem install bundler
         bundle install
+
+    - name: Wait for DB to be ready
+      run: |
+        until pg_isready -h db -U postgres; do
+          echo "Waiting for database..."
+          sleep 2
+        done
+
+    - name: Set up DB configuration
+      run: |
+        cp config/database.yml.ci config/database.yml
 
     - name: Prepare Database
       env:
