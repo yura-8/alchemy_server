@@ -6,6 +6,8 @@ RSpec.describe "Quizs", type: :request do
       it "returns http success" do
         get "/quizs/1"
         expect(response).to have_http_status(:success)
+        json_response = JSON.parse(response.body)
+        expect(json_response["quiz"].length).to eq(1)
       end
     end
 
@@ -13,6 +15,8 @@ RSpec.describe "Quizs", type: :request do
       it "returns http success" do
         get "/quizs/5"
         expect(response).to have_http_status(:success)
+        json_response = JSON.parse(response.body)
+        expect(json_response["quiz"].length).to eq(5)
       end
     end
   end
