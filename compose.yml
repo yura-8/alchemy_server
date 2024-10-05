@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   # dbコンテナ (PostgreSQLに変更)
   db:
@@ -8,6 +10,8 @@ services:
       - db-data:/var/lib/postgresql/data
     ports:
       - "5432:5432" # PostgreSQLのデフォルトポート
+    networks:
+      - webnet
 
   # webコンテナ
   web:
@@ -16,11 +20,28 @@ services:
       - db
     environment:
       DATABASE_PASSWORD: password
-    ports:
-      - "3000:3000"
     volumes:
       - .:/alchemy_server
     command: bash -c "rm -f tmp/pids/server.pid && rails server -b '0.0.0.0'"
+    expose:
+      - "3000" # Nginx will connect to this port
+    networks:
+      - webnet
+
+  # nginxコンテナ
+  nginx:
+    image: nginx:latest
+    depends_on:
+      - web
+    ports:
+      - "80:80" # 外部からのアクセスを受け付けるポート
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf # Nginxの設定ファイル
+    networks:
+      - webnet
 
 volumes:
   db-data:
+
+networks:
+  webnet:
