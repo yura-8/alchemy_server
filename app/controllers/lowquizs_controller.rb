@@ -1,6 +1,6 @@
-class LowquizController < ApplicationController
+class LowquizsController < ApplicationController
     def show
-        random_quizs = Quiz.order("RANDOM()").limit(:params[:id].to_i)
+        random_quizs = Lowquiz.order("RANDOM()").limit(params[:id].to_i)
         render json: {
             quiz: random_quizs.map do |quiz|
             {
